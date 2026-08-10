@@ -36,7 +36,9 @@ odds ratios) is in `notebooks/01_eda_and_hypothesis_testing.ipynb` and
 
 ## Dashboard
 
-_(Added once the dashboard — Task 9 — is complete.)_
+An interactive Streamlit dashboard lets you explore accident counts and
+severity by state, weather condition, and hour of day. Run locally with
+`uv run streamlit run dashboard/app.py`, or see the live link below.
 
 ## Live demo
 
