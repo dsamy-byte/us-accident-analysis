@@ -30,8 +30,9 @@ few-day timeline via the data strategy below.
    valid inference at this level.
 3. The dashboard reads only **pre-aggregated Parquet files**, not the raw
    CSV, so it stays fast on Render's free tier.
-4. Raw CSV is never committed to git — `.gitignore`'d, downloaded via the
-   Kaggle API using credentials in a git-ignored `.env` file.
+4. Raw CSV is never committed to git — `.gitignore`'d. Downloaded manually
+   from the Kaggle dataset page and placed in `data/raw/`; no Kaggle API
+   credentials or `.env` are needed for this step.
 
 ## Statistical analysis plan
 
@@ -84,11 +85,10 @@ few-day timeline via the data strategy below.
 
 ```
 Kaggle-Data-Project/
-  .env                  # Kaggle API creds (gitignored)
   .gitignore
   pyproject.toml        # uv-managed deps
   data/
-    raw/                # gitignored, downloaded via Kaggle API
+    raw/                # gitignored, manually downloaded from Kaggle
     processed/          # gitignored or DVC-tracked Parquet aggregates
   notebooks/
   report/
