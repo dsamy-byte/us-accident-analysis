@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Data (downloaded via Kaggle API, never committed)
+data/raw/
+data/processed/
+
+# Claude Code local state
+.claude/settings.local.json
+.claude/mind.mv2*
+.claude/.mind.mv2*
+
+# OS / editor
+.vscode/
+.DS_Store
