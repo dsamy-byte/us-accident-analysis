@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: us-accident-analysis-dashboard
+    runtime: python
+    buildCommand: "pip install uv && uv sync --no-dev"
+    startCommand: "uv run streamlit run dashboard/app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true"
+    plan: free
+    autoDeploy: true
+    branch: main
