@@ -93,12 +93,12 @@ Kaggle-Data-Project/
   pyproject.toml        # uv-managed deps
   data/
     raw/                # gitignored, manually downloaded from Kaggle
-    processed/          # gitignored or DVC-tracked Parquet aggregates
+    processed/          # committed — small Parquet aggregates (dashboard/CI/Render depend on these)
   notebooks/
   report/
   dashboard/
     app.py
-    Dockerfile / render.yaml
+  render.yaml            # Render native Python deploy config (no Docker)
   vault/                # Obsidian vault (data dictionary, methodology,
                          # decisions, findings)
   docs/

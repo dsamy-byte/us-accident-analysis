@@ -59,8 +59,7 @@ Kaggle-Data-Project/
     executive_summary.md
   dashboard/
     app.py
-    Dockerfile
-    render.yaml
+  render.yaml
   vault/
     00-Index.md
     Data-Dictionary.md
@@ -1677,68 +1676,37 @@ expect a green run for this push.
 
 ---
 
-### Task 11: Dockerfile + Render Config
+### Task 11: Render Config (no Docker)
 
 **Files:**
-- Create: `dashboard/Dockerfile`
 - Create: `render.yaml`
 
 **Interfaces:**
 - Consumes: `dashboard/app.py` (Task 9), `pyproject.toml` (Task 1).
-- Produces: the artifacts Render needs to build and run the dashboard as a
-  web service.
+- Produces: the config Render needs to build and run the dashboard as a
+  native Python web service — no Dockerfile, no container image to
+  maintain. Render's Python runtime installs dependencies with a plain
+  build command and runs a plain start command, same as running locally.
 
-- [ ] **Step 1: Write `dashboard/Dockerfile`**
-
-```dockerfile
-FROM python:3.11-slim
-
-# Install uv for fast, reproducible dependency installation matching
-# the lockfile used in development.
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
-WORKDIR /app
-COPY pyproject.toml ./
-COPY src/ ./src/
-COPY dashboard/ ./dashboard/
-COPY data/processed/ ./data/processed/
-
-RUN uv sync --no-dev
-
-# Render provides $PORT at runtime; Streamlit must bind to it.
-EXPOSE 8501
-CMD uv run streamlit run dashboard/app.py \
-    --server.port=$PORT \
-    --server.address=0.0.0.0 \
-    --server.headless=true
-```
-
-- [ ] **Step 2: Write `render.yaml`**
+- [ ] **Step 1: Write `render.yaml`**
 
 ```yaml
 services:
   - type: web
     name: us-accident-analysis-dashboard
-    runtime: docker
-    dockerfilePath: ./dashboard/Dockerfile
-    dockerContext: .
+    runtime: python
+    buildCommand: "pip install uv && uv sync --no-dev"
+    startCommand: "uv run streamlit run dashboard/app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true"
     plan: free
     autoDeploy: true
     branch: main
 ```
 
-- [ ] **Step 3: Verify the Dockerfile builds, if Docker is available locally**
-
-Run: `docker build -f dashboard/Dockerfile -t us-accident-dashboard .`
-Expected: exits 0. If Docker isn't installed locally, skip this step —
-Render will build it directly; verification happens in Task 12 once
-deployed.
-
-- [ ] **Step 4: Commit**
+- [ ] **Step 2: Commit**
 
 ```bash
-git add dashboard/Dockerfile render.yaml
-git commit -m "build: add Dockerfile and render.yaml for Render deployment"
+git add render.yaml
+git commit -m "build: add render.yaml for native Python deployment (no Docker)"
 git push
 ```
 
@@ -1751,7 +1719,7 @@ git push
 - Modify: `README.md`
 
 **Interfaces:**
-- Consumes: `render.yaml`, `dashboard/Dockerfile` (Task 11), and the
+- Consumes: `render.yaml` (Task 11), and the
   `dsamy-byte/us-accident-analysis` GitHub repo (already connected).
 - Produces: a live public URL for the dashboard.
 
