@@ -7,9 +7,11 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 
-# Data (downloaded via Kaggle API, never committed)
+# Raw data is 1-3GB and never committed. Small pre-aggregated Parquet
+# files under data/processed/ ARE committed — the dashboard, CI, and
+# Render deployment all depend on them and have no way to regenerate
+# them without the local raw CSV.
 data/raw/
-data/processed/
 
 # Claude Code local state
 .claude/settings.local.json
