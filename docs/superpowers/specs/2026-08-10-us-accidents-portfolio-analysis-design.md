@@ -57,8 +57,12 @@ few-day timeline via the data strategy below.
 
 1. `notebooks/` — narrative analysis notebook: EDA → hypotheses → tests →
    findings.
-2. `report/` — short executive-summary report (PDF, generated from
-   Markdown/Quarto) for a non-technical stakeholder.
+2. `report/` — executive-summary report (PDF, generated from
+   Markdown/Quarto) for a non-technical stakeholder. Built incrementally:
+   every implementation phase adds its findings/narrative to this report
+   as that phase completes, rather than writing it up only at the end.
+   This keeps a presentable, employer-ready deliverable available at every
+   checkpoint, not just after the full project is done.
 3. `dashboard/` — Streamlit app (severity trends, geographic hotspots,
    weather/time patterns), deployed live on Render.
 4. `vault/` — in-repo Obsidian vault: data dictionary, methodology log,
