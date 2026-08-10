@@ -4,7 +4,6 @@ effect at all) so the expected significance of the result is known in
 advance, independent of the real dataset.
 """
 import pandas as pd
-import pytest
 
 from us_accidents.stats_tests import (
     anova_severity_by_hour,
