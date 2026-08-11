@@ -8,7 +8,7 @@ dataset (~7.7M records), built as a Data Analyst/BI portfolio project.
 - `notebooks/01_eda_and_hypothesis_testing.ipynb` — full analysis: EDA,
   hypothesis tests, logistic regression, interpreted results.
 - `report/executive_summary.md` — non-technical write-up of findings.
-- `dashboard/` — Streamlit dashboard ([live demo](#) — link added once deployed).
+- `dashboard/` — Streamlit dashboard ([live demo](https://us-accident-analysis-dashboard.onrender.com)).
 - `vault/` — project documentation vault (data dictionary, methodology log,
   decisions, findings) in Obsidian-compatible Markdown.
 

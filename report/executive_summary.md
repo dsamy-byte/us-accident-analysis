@@ -51,4 +51,7 @@ link below.
 
 ## Live demo
 
-_(Added once deployment — Task 12 — is complete.)_
+[Live dashboard](https://us-accident-analysis-dashboard.onrender.com)
+
+Note: on Render's free tier the service sleeps after inactivity and may
+take ~30 seconds to wake on first load.
