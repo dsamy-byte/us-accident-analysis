@@ -14,7 +14,8 @@ def test_dashboard_runs_without_exception():
     assert not at.exception
 
 
-def test_dashboard_renders_state_selector():
+def test_dashboard_renders_state_and_year_selectors():
+    """The cross-filter row has two selectboxes: state and year."""
     at = AppTest.from_file(APP_PATH)
     at.run(timeout=30)
-    assert len(at.selectbox) >= 1
+    assert len(at.selectbox) == 2
