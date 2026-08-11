@@ -36,3 +36,10 @@ support filesystem hardlinks. `uv sync` therefore does full file copies
 instead of the usual instant hardlinks — installs/reinstalls are slower
 than on an NTFS drive, but functionally unaffected. Accepted as a known
 tradeoff rather than relocating the project.
+
+## Project status
+
+All phases complete: data pipeline, statistical analysis, dashboard,
+CI/CD, and live deployment. See [[Findings]] for results and
+`report/executive_summary.md` (also exported as `executive_summary.pdf`)
+for the employer-facing summary.

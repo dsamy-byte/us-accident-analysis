@@ -34,6 +34,12 @@ Full statistical detail (test statistics, p-values, confidence intervals,
 odds ratios) is in `notebooks/01_eda_and_hypothesis_testing.ipynb` and
 `vault/Findings.md`.
 
+### Key visualizations
+
+![Top 15 states by accident count](fig_top_states.png)
+
+![Average accident severity by hour of day](fig_severity_by_hour.png)
+
 ## Dashboard
 
 An interactive Streamlit dashboard covers:
@@ -55,3 +61,12 @@ link below.
 
 Note: on Render's free tier the service sleeps after inactivity and may
 take ~30 seconds to wake on first load.
+
+## Conclusion
+
+This project demonstrates an end-to-end Data Analyst/BI workflow: scalable
+data processing (DuckDB) on a real 7.7M-record dataset, rigorous
+statistical inference (hypothesis testing, logistic regression with
+interpreted effect sizes) rather than purely descriptive analysis, and a
+deployed, interactive way to explore the results — with full reproducibility
+via automated tests and CI/CD.
