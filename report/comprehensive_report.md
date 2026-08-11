@@ -1,11 +1,10 @@
 # US Accidents (2016-2023): Comprehensive Statistical Analysis Report
 
-**Data Analyst/BI portfolio project.** This document combines the full
-project methodology, data dictionary, complete analysis notebook (code,
-narrative, and real computed results), findings, and the reasoning behind
-every major project decision — everything needed to evaluate both the
-results and the process behind them. For a shorter, non-technical
-version, see `executive_summary.md` / `executive_summary.pdf`.
+Data Analyst/BI portfolio project. This report pulls together the
+project methodology, the data dictionary, the full analysis notebook
+(code, narrative, and the actual results it produced), the findings, and
+the reasoning behind each major decision made along the way. For the
+short version, see `executive_summary.md` / `executive_summary.pdf`.
 
 ## Table of contents
 
@@ -22,12 +21,15 @@ version, see `executive_summary.md` / `executive_summary.pdf`.
 
 ## Project overview
 
-Statistical analysis of ~7.7 million US traffic accident records
-(2016-2023), examining what factors are associated with accident
-severity — weather, time of day, and road features — using hypothesis
-testing and logistic regression, presented alongside an interactive
-dashboard. Built end-to-end: data pipeline, statistical analysis,
-dashboard, automated tests, CI/CD, and live deployment.
+This is a statistical analysis of about 7.7 million US traffic accident
+records from 2016 to 2023. The question was straightforward: what
+actually drives accident severity? Does weather matter? Time of day?
+What about road features like junctions and stop signs? Hypothesis
+testing and logistic regression were used to answer that, and an
+interactive dashboard was built on top so the results are easy to
+explore rather than buried in a notebook. The full scope, data pipeline,
+statistical analysis, dashboard, automated tests, CI/CD, and live
+deployment, was all built for this project.
 
 ---
 
@@ -35,38 +37,40 @@ dashboard, automated tests, CI/CD, and live deployment.
 
 ### Data acquisition
 
-Downloaded manually from the
+The dataset was downloaded by hand from the
 [Kaggle dataset page](https://www.kaggle.com/datasets/sobhanmoosavi/us-accidents)
-(no Kaggle API/credentials required) into
-`data/raw/US_Accidents_March23.csv` (~3.06GB, ~7.7M rows). See the
-Project Decisions section below for why manual download was chosen over
-the Kaggle API.
+rather than through the Kaggle API, so no API credentials were needed. It
+landed at `data/raw/US_Accidents_March23.csv`, about 3.06GB and 7.7
+million rows. The reasoning for skipping the API is covered in the
+Project Decisions section below.
 
 ### Processing pipeline
 
 1. `us_accidents.ingest.load_raw` registers the CSV as a DuckDB view
    without loading it into memory.
-2. `us_accidents.ingest.validate_schema` checks the columns in the Data
-   Dictionary (below) are present.
-3. `us_accidents.aggregate` produces:
+2. `us_accidents.ingest.validate_schema` checks that the columns listed
+   in the Data Dictionary (below) are actually present.
+3. `us_accidents.aggregate` produces two kinds of output:
    - Group-by rollups (by state, weather, hour, year) for the dashboard
      and descriptive statistics.
    - A 200,000-row reproducible random sample (seed 42) for hypothesis
-     testing and regression — full-dataset granularity isn't needed for
+     testing and regression. Full-dataset granularity isn't needed for
      valid inference at this scale.
-4. All outputs are written to `data/processed/` as Parquet (plus a JSON
-   summary of the regression results) and committed to git — small,
-   derived files, unlike the raw CSV.
+4. Everything gets written to `data/processed/` as Parquet, plus a JSON
+   summary of the regression results, and all of it is committed to git.
+   These are small, derived files, unlike the raw CSV.
 
 Run via: `uv run python scripts/build_aggregates.py`
 
 ### Development environment note
 
-The project lives on an external exFAT-formatted drive, which doesn't
-support filesystem hardlinks. `uv sync` therefore does full file copies
-instead of the usual instant hardlinks — installs/reinstalls are slower
-than on an NTFS drive, but functionally unaffected. Accepted as a known
-tradeoff rather than relocating the project.
+One quirk worth mentioning: the project sits on an external drive
+formatted as exFAT, which doesn't support filesystem hardlinks. That
+means `uv sync` has to do full file copies instead of the usual
+near-instant hardlinks, so installs and reinstalls run slower than
+they would on an NTFS drive. It doesn't affect correctness, only speed,
+so this was accepted as a known tradeoff rather than moving the whole
+project to work around it.
 
 ---
 
@@ -74,8 +78,8 @@ tradeoff rather than relocating the project.
 
 Source:
 [US Accidents (2016-2023)](https://www.kaggle.com/datasets/sobhanmoosavi/us-accidents)
-by Sobhan Moosavi. Columns below are the ones this analysis actually uses
-(the raw file has 46 columns total).
+by Sobhan Moosavi. The table below covers only the columns this analysis
+actually uses; the raw file has 46 columns in total.
 
 | Column | Type | Meaning |
 |---|---|---|
@@ -95,9 +99,10 @@ by Sobhan Moosavi. Columns below are the ones this analysis actually uses
 
 ## Full analysis
 
-The following is the complete, executed analysis notebook
-(`notebooks/01_eda_and_hypothesis_testing.ipynb`) — all code, narrative,
-and real computed results reproduced directly, not summarized.
+What follows is the analysis notebook itself
+(`notebooks/01_eda_and_hypothesis_testing.ipynb`), reproduced directly
+rather than summarized: the code, the narrative, and the real output it
+produced when run.
 
 ### US Accidents (2016-2023): Exploratory Analysis & Hypothesis Testing
 
@@ -179,7 +184,7 @@ Severity IS significantly associated with weather condition (chi-square = 9674.6
 ```
 
 *(Note: the true p-value underflows to 0 given the sample size and effect
-size; reported as p < 0.0001 elsewhere in this report rather than
+size. It's reported as p < 0.0001 elsewhere in this report instead of a
 literal 0.)*
 
 #### H2: Severity vs. hour of day
@@ -223,7 +228,7 @@ for feature in feature_cols:
     sig = "significant" if p < 0.05 else "not significant"
     line = (
         f"{feature}: odds ratio = {odds:.2f} (95% CI [{lower:.2f}, {upper:.2f}]), "
-        f"p = {p:.4g} ({sig}) — presence of {feature} {direction} the odds "
+        f"p = {p:.4g} ({sig}). Presence of {feature} {direction} the odds "
         f"of a high-severity accident."
     )
     logit_findings.append(line)
@@ -233,10 +238,10 @@ print(pseudo_r2_line)
 ```
 
 ```
-Junction: odds ratio = 1.34 (95% CI [1.29, 1.39]), p = 9.946e-49 (significant) — presence of Junction increases the odds of a high-severity accident.
-Crossing: odds ratio = 0.41 (95% CI [0.39, 0.44]), p = 5.143e-208 (significant) — presence of Crossing decreases the odds of a high-severity accident.
-Traffic_Signal: odds ratio = 0.54 (95% CI [0.52, 0.57]), p = 2.85e-165 (significant) — presence of Traffic_Signal decreases the odds of a high-severity accident.
-Stop: odds ratio = 0.30 (95% CI [0.27, 0.34]), p = 8.005e-99 (significant) — presence of Stop decreases the odds of a high-severity accident.
+Junction: odds ratio = 1.34 (95% CI [1.29, 1.39]), p = 9.946e-49 (significant). Presence of Junction increases the odds of a high-severity accident.
+Crossing: odds ratio = 0.41 (95% CI [0.39, 0.44]), p = 5.143e-208 (significant). Presence of Crossing decreases the odds of a high-severity accident.
+Traffic_Signal: odds ratio = 0.54 (95% CI [0.52, 0.57]), p = 2.85e-165 (significant). Presence of Traffic_Signal decreases the odds of a high-severity accident.
+Stop: odds ratio = 0.30 (95% CI [0.27, 0.34]), p = 8.005e-99 (significant). Presence of Stop decreases the odds of a high-severity accident.
 Pseudo R-squared: 0.0243
 ```
 
@@ -244,37 +249,38 @@ Pseudo R-squared: 0.0243
 
 ## Findings summary
 
-Based on a reproducible 200,000-row stratified sample (seed 42) of the
-full 7.7M-row dataset.
+These numbers come from a reproducible 200,000-row sample (seed 42) of
+the full 7.7 million-row dataset.
 
 ### H1: Severity vs. weather condition
 
-Severity IS significantly associated with weather condition
+Severity is significantly associated with weather condition
 (chi-square = 9674.69, df = 276, p < 0.0001).
 
 ### H2: Severity vs. hour of day
 
-Mean severity DOES differ significantly by hour of day
+Mean severity does differ by hour of day
 (F = 9.83, p = 2.797e-35).
 
 ### Predictors of high-severity accidents (logistic regression)
 
-Target: `High_Severity` (Severity >= 3). All four road-feature predictors
-are statistically significant:
+Target: `High_Severity` (Severity >= 3). All four road-feature
+predictors turned out to be statistically significant.
 
-- **Junction**: odds ratio = 1.34 (95% CI [1.29, 1.39]), p = 9.946e-49 —
-  presence of a junction *increases* the odds of a high-severity accident.
-- **Crossing**: odds ratio = 0.41 (95% CI [0.39, 0.44]), p = 5.143e-208 —
-  presence of a crossing *decreases* the odds of a high-severity accident.
-- **Traffic_Signal**: odds ratio = 0.54 (95% CI [0.52, 0.57]), p = 2.85e-165 —
-  presence of a traffic signal *decreases* the odds of a high-severity accident.
-- **Stop**: odds ratio = 0.30 (95% CI [0.27, 0.34]), p = 8.005e-99 —
-  presence of a stop sign *decreases* the odds of a high-severity accident.
+- **Junction**: odds ratio 1.34 (95% CI [1.29, 1.39]), p = 9.946e-49.
+  Being near a junction *increases* the odds of a high-severity accident.
+- **Crossing**: odds ratio 0.41 (95% CI [0.39, 0.44]), p = 5.143e-208.
+  Being near a crossing *decreases* the odds.
+- **Traffic_Signal**: odds ratio 0.54 (95% CI [0.52, 0.57]), p = 2.85e-165.
+  Being near a traffic signal *decreases* the odds.
+- **Stop**: odds ratio 0.30 (95% CI [0.27, 0.34]), p = 8.005e-99.
+  Being near a stop sign *decreases* the odds, and by the largest margin
+  of the four.
 
-Pseudo R-squared: 0.0243 — these four road features alone explain a small
-but statistically robust share of variance in severity; weather and time
-of day (H1, H2) are additional contributing factors not included in this
-particular model.
+Pseudo R-squared: 0.0243. That's low, and it should be. These four road
+features alone only explain a small slice of what drives severity.
+Weather and time of day (H1, H2) clearly matter too, and neither is part
+of this particular model.
 
 ---
 
@@ -282,80 +288,82 @@ particular model.
 
 ### Dataset: US Accidents (2016-2023)
 
-Chosen for scale (~7.7M rows) and popularity, while remaining tractable
-for a few-day timeline via DuckDB + aggregation rather than loading
-everything into pandas.
+Picked for its scale (about 7.7M rows) and how well-known it is, while
+still staying manageable in a few days by leaning on DuckDB and
+aggregation instead of loading everything into pandas.
 
 ### DuckDB for querying, not a hosted database
 
-DuckDB is an embedded analytical engine — it queries the CSV directly off
-local disk, no server or upload required. A hosted database (e.g.
-Render's free Postgres) was considered and rejected: free-tier storage
-caps are too small for the raw file, free databases expire without
-upgrading to paid, and row-store Postgres is the wrong engine for bulk
-analytical aggregation compared to DuckDB's columnar execution. The
-dashboard never needs the raw data anyway — it only reads small
+DuckDB is an embedded analytical engine. It queries the CSV directly off
+local disk, no server or upload required. A hosted database (Render's
+free Postgres, for example) was considered and ruled out: the free-tier
+storage cap is too small for the raw file, free databases expire unless
+you upgrade to paid, and a row-store like Postgres is the wrong tool for
+bulk analytical aggregation compared to DuckDB's columnar execution. The
+dashboard doesn't need the raw data anyway. It only reads small,
 pre-aggregated Parquet files.
 
 ### Manual dataset download instead of the Kaggle API
 
-Simpler for this project's scope — avoids needing Kaggle API credentials
-or a `.env` file for a one-time download step.
+Simpler for a project this size. It avoids needing Kaggle API
+credentials or a `.env` file just for a one-time download.
 
 ### Separate GitHub account (`dsamy-byte`)
 
-Kept fully isolated from the personal GitHub account: git identity is set
-at the repo level only (no `--global` changes), and a dedicated SSH key
-with a host alias (`github.com-dsamy-byte`) means this repo authenticates
-as the new account automatically via its remote URL.
+Kept fully isolated from any personal GitHub account. Git identity is
+set at the repo level only, no `--global` changes, and a dedicated SSH
+key with a host alias (`github.com-dsamy-byte`) means this repo
+authenticates as the right account automatically through its remote URL.
 
 ### Render over Streamlit Community Cloud
 
-Render hosts the dashboard as a web service, deploying automatically from
-GitHub on every push to `main`.
+Render hosts the dashboard as a web service and deploys automatically
+from GitHub on every push to `main`.
 
-### Render native Python runtime, not Docker
+### Render's native Python runtime, not Docker
 
-No Dockerfile — `render.yaml` uses `runtime: python` with a plain build/
-start command. Simpler, nothing to maintain, and the dashboard has no
-dependency (like DuckDB) that actually needs to run at deploy time — it
-only reads pre-built Parquet files with pandas.
+No Dockerfile. `render.yaml` uses `runtime: python` with a plain build
+and start command. It's simpler, there's nothing extra to maintain, and
+the dashboard has no dependency (like DuckDB) that actually needs to run
+at deploy time. It just reads pre-built Parquet files with pandas.
 
-### Report/narrative built incrementally
+### Reports built incrementally
 
-The reports were updated at the end of each project phase (not written
-only at the end), so there was always a presentable deliverable
-available, even if the project were paused partway through.
+The reports were updated at the end of each project phase rather than
+written only at the very end, so there was always something presentable
+on hand, even if the project had been paused partway through.
 
 ---
 
 ## Dashboard and live demo
 
-An interactive Streamlit dashboard covers:
+The interactive Streamlit dashboard covers:
 
-- A **US map** of accident counts by state, plus a top-20 state bar chart.
-- A **year-over-year trend** of accident counts, 2016-2023.
-- **Cross-filterable** weather-condition and hour-of-day breakdowns — pick
-  a state and/or year and both charts update to that slice of the data.
-- A **key drivers panel** surfacing the logistic regression findings
-  (odds ratios with confidence intervals) directly in the dashboard, not
-  just the notebook.
+- A US map of accident counts by state, plus a top-20 state bar chart.
+- A year-over-year trend of accident counts, 2016 through 2023.
+- Cross-filterable weather-condition and hour-of-day breakdowns. Pick a
+  state and/or year and both charts update to that slice of the data.
+- A key drivers panel that surfaces the logistic regression findings
+  (odds ratios with confidence intervals) right in the dashboard, not
+  just buried in the notebook.
 
 **Live dashboard**: https://us-accident-analysis-dashboard.onrender.com
-(Render's free tier sleeps after inactivity — first load may take ~30
-seconds to wake.)
 
-Run locally with `uv run streamlit run dashboard/app.py`.
+Note that Render's free tier sleeps after inactivity, so the first load
+can take about 30 seconds to wake up.
+
+Run it locally with `uv run streamlit run dashboard/app.py`.
 
 ---
 
 ## Conclusion
 
-This project demonstrates an end-to-end Data Analyst/BI workflow:
-scalable data processing (DuckDB) on a real 7.7M-record dataset, rigorous
-statistical inference (hypothesis testing, logistic regression with
-interpreted effect sizes) rather than purely descriptive analysis, and a
-deployed, interactive way to explore the results — with full
-reproducibility via automated tests and CI/CD.
+This project is meant to show what an end-to-end Data Analyst/BI
+workflow actually looks like: scalable data processing with DuckDB on a
+real 7.7 million-record dataset, real statistical inference (hypothesis
+testing and logistic regression with effect sizes that are actually
+interpreted, not just reported) rather than surface-level description,
+and a deployed, interactive way for someone else to explore the results
+themselves. Automated tests and CI/CD keep the whole thing reproducible.
 
 **Project repository**: https://github.com/dsamy-byte/us-accident-analysis
