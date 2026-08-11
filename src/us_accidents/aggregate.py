@@ -73,6 +73,28 @@ def aggregate_by_hour(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
     ).fetchdf()
 
 
+def aggregate_by_year(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
+    """Accident count and mean severity per calendar year.
+
+    Args:
+        con: connection with the `accidents` view registered.
+
+    Returns:
+        DataFrame with columns [year, accident_count, avg_severity],
+        sorted by year ascending.
+    """
+    return con.execute(
+        """
+        SELECT EXTRACT(YEAR FROM Start_Time) AS year,
+               COUNT(*) AS accident_count,
+               AVG(Severity) AS avg_severity
+        FROM accidents
+        GROUP BY year
+        ORDER BY year
+        """
+    ).fetchdf()
+
+
 def sample_rows(con: duckdb.DuckDBPyConnection, n: int = 200_000, seed: int = 42) -> pd.DataFrame:
     """Draw a reproducible row-level sample for hypothesis testing and
     regression, which need individual observations rather than pre-
@@ -87,7 +109,9 @@ def sample_rows(con: duckdb.DuckDBPyConnection, n: int = 200_000, seed: int = 42
     Returns:
         DataFrame with columns [Severity, State, Weather_Condition,
         temperature_f, visibility_mi, Junction, Crossing, Traffic_Signal,
-        Stop, Sunrise_Sunset, hour].
+        Stop, Sunrise_Sunset, hour, year]. `year` and `State` let the
+        dashboard cross-filter the weather/hour views without needing a
+        separate pre-aggregated table for every combination.
     """
     return con.execute(
         f"""
@@ -102,7 +126,8 @@ def sample_rows(con: duckdb.DuckDBPyConnection, n: int = 200_000, seed: int = 42
             Traffic_Signal,
             Stop,
             Sunrise_Sunset,
-            EXTRACT(HOUR FROM Start_Time) AS hour
+            EXTRACT(HOUR FROM Start_Time) AS hour,
+            EXTRACT(YEAR FROM Start_Time) AS year
         FROM accidents
         USING SAMPLE {n} ROWS (reservoir, {seed})
         """

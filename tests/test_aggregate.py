@@ -11,6 +11,7 @@ from us_accidents.aggregate import (
     aggregate_by_hour,
     aggregate_by_state,
     aggregate_by_weather,
+    aggregate_by_year,
     sample_rows,
     write_parquet,
 )
@@ -46,6 +47,15 @@ def test_aggregate_by_hour_counts_and_avg_severity():
     assert row.avg_severity == pytest.approx(2.5)
 
 
+def test_aggregate_by_year_counts_and_avg_severity():
+    con = load_raw(str(FIXTURE))
+    df = aggregate_by_year(con)
+    row = df[df.year == 2016].iloc[0]
+    # 2016 rows: A-1(3), A-2(2), A-3(2), A-4(4) -> count 4, mean 2.75
+    assert row.accident_count == 4
+    assert row.avg_severity == pytest.approx(2.75)
+
+
 def test_sample_rows_returns_requested_count_and_columns():
     con = load_raw(str(FIXTURE))
     df = sample_rows(con, n=5, seed=42)
@@ -62,6 +72,7 @@ def test_sample_rows_returns_requested_count_and_columns():
         "Stop",
         "Sunrise_Sunset",
         "hour",
+        "year",
     }
 
 
